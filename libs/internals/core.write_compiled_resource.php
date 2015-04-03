@@ -48,7 +48,7 @@ function smarty_core_write_compiled_resource($params, &$smarty)
      * Added 04/03/2015 by Yola. Necessary to avoid bug in PHP with
      * is_writable() not working correctly with ACL permissions.
      */
-    $isWin = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+    $isWin = strtoupper(substr(php_uname('s'), 0, 3)) === 'WIN';
     /**
      * $isWin related checks and is_writable_win() added 04/03/2015 by Yola
      * Circumvent PHP bug with is_writable not handling ACLs correctly on
