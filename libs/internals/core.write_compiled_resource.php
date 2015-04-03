@@ -6,32 +6,42 @@
  */
 
 /**
- * Check to see if the path is writable on a Windows machine
- * Copied from http://php.net/manual/en/function.is-writable.php comment by
+ * Check to see if the path is writable, works on Windows platforms
+ * Based from http://php.net/manual/en/function.is-writable.php comment by
  * legolas558
  *
  * Added 04/03/2015 by Yola to address is_writable PHP bug that does not
  * correctly handle ACL on Windows platforms.
  */
-function is_writable_win($path) {
-//will work in despite of Windows ACLs bug
-//NOTE: use a trailing slash for folders!!!
-//see http://bugs.php.net/bug.php?id=27609
-//see http://bugs.php.net/bug.php?id=30931
+function isWritable($path)
+{
+    $isWin = strtoupper(substr(php_uname('s'), 0, 3)) === 'WIN';
 
-    if ($path{strlen($path)-1}=='/') // recursively return a temporary file path
-        return is__writable($path.uniqid(mt_rand()).'.tmp');
-    else if (is_dir($path))
-        return is__writable($path.'/'.uniqid(mt_rand()).'.tmp');
-    // check tmp file for read/write capabilities
-    $rm = file_exists($path);
-    $f = @fopen($path, 'a');
-    if ($f===false)
-        return false;
-    fclose($f);
-    if (!$rm)
-        unlink($path);
-    return true;
+    if($isWin) {
+        if ($path{strlen($path) - 1} == '/') {
+            return isWritable($path.uniqid(mt_rand()) . '.tmp');
+        } elseif (is_dir($path)) {
+            return isWritable($path . '/' . uniqid(mt_rand()) . 'tmp');
+        }
+
+        // check tmp file for read/write capabilities
+        $rm = file_exists($path);
+        $f = @fopen($path, 'a');
+
+        if ($f === false) {
+            return false;
+        }
+
+        fclose($f);
+
+        if (!$rm) {
+            unlink($path);
+        }
+
+        return true;
+    }
+
+    return is_writable($path);
 }
 
 /**
@@ -44,17 +54,10 @@ function is_writable_win($path) {
 function smarty_core_write_compiled_resource($params, &$smarty)
 {
     /**
-     * Detect if running on a Windows server
-     * Added 04/03/2015 by Yola. Necessary to avoid bug in PHP with
-     * is_writable() not working correctly with ACL permissions.
+     * Replaced `is_writable` with `isWritable` 04/03/2015 by Yola
+     * Avoids PHP bug with `is_writable` on Windows platform
      */
-    $isWin = strtoupper(substr(php_uname('s'), 0, 3)) === 'WIN';
-    /**
-     * $isWin related checks and is_writable_win() added 04/03/2015 by Yola
-     * Circumvent PHP bug with is_writable not handling ACLs correctly on
-     * Windows platfrom.
-     */
-    if((!$isWin && !@is_writable($smarty->compile_dir)) || ($isWin && !is_writable_win($smarty->compile_dir))) {
+    if(!@isWritable($smarty->compile_dir)) {
         // compile_dir not writable, see if it exists
         if(!@is_dir($smarty->compile_dir)) {
             $smarty->trigger_error('the $compile_dir \'' . $smarty->compile_dir . '\' does not exist, or is not a directory.', E_USER_ERROR);
