@@ -19,13 +19,13 @@ function isWritable($path)
 
     if($isWin) {
         if ($path{strlen($path) - 1} == '/') {
-            return isWritable($path.uniqid(mt_rand()) . '.tmp');
+            $path = $path . uniqid(mt_rand() . '.tmp');
         } elseif (is_dir($path)) {
-            return isWritable($path . '/' . uniqid(mt_rand()) . 'tmp');
+            $path = $path . DIRECTORY_SEPARATOR . uniqid(mt_rand() . 'tmp');
         }
 
         // check tmp file for read/write capabilities
-        $rm = file_exists($path);
+        $newFile = !file_exists($path);
         $f = @fopen($path, 'a');
 
         if ($f === false) {
@@ -34,7 +34,8 @@ function isWritable($path)
 
         fclose($f);
 
-        if (!$rm) {
+        // if the file was created by fopen, delete it
+        if ($newFile) {
             unlink($path);
         }
 
