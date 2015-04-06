@@ -7,11 +7,7 @@
 
 /**
  * Check to see if the path is writable, works on Windows platforms
- * Based from http://php.net/manual/en/function.is-writable.php comment by
- * legolas558
- *
- * Added 04/03/2015 by Yola to address is_writable PHP bug that does not
- * correctly handle ACL on Windows platforms.
+ * See http://php.net/manual/en/function.is-writable.php comments
  */
 function isWritable($path)
 {
@@ -54,10 +50,6 @@ function isWritable($path)
  */
 function smarty_core_write_compiled_resource($params, &$smarty)
 {
-    /**
-     * Replaced `is_writable` with `isWritable` 04/03/2015 by Yola
-     * Avoids PHP bug with `is_writable` on Windows platform
-     */
     if(!@isWritable($smarty->compile_dir)) {
         // compile_dir not writable, see if it exists
         if(!@is_dir($smarty->compile_dir)) {
