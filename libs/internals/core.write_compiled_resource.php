@@ -14,7 +14,7 @@ function isWritable($path)
     $isWin = strtoupper(substr(php_uname('s'), 0, 3)) === 'WIN';
 
     if($isWin) {
-        if ($path{strlen($path) - 1} == '/') {
+        if (substr($path, -1) == '/') {
             $path = $path . uniqid(mt_rand() . '.tmp');
         } elseif (is_dir($path)) {
             $path = $path . DIRECTORY_SEPARATOR . uniqid(mt_rand() . 'tmp');
